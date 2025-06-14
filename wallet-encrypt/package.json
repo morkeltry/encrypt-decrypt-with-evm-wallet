@@ -59,6 +59,7 @@
     }
   },
   "dependencies": {
+    "hash.js": "^1.1.7",
     "tweetnacl-util": "^0.15.1"
   }
 }

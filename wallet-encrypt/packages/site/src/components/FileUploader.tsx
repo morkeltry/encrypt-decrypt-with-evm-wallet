@@ -2,13 +2,20 @@ import React, { useState, DragEvent, ChangeEvent } from "react";
 
 interface FileUploaderProps {
   onFilesSelected?: (files: File[]) => void;
+  snapConnected: boolean;
 }
 
-export const FileUploader: React.FC<FileUploaderProps> = ({ onFilesSelected }) => {
+export const FileUploader: React.FC<FileUploaderProps> = ({ onFilesSelected, snapConnected }) => {
   const [files, setFiles] = useState<File[]>([]);
+  const [flash, setFlash] = useState(false);
 
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
+    if (!snapConnected) {
+      setFlash(true);
+      setTimeout(() => setFlash(false), 400);
+      return;
+    }
     const droppedFiles = Array.from(event.dataTransfer.files);
     setFiles(droppedFiles);
     onFilesSelected?.(droppedFiles);
@@ -19,6 +26,11 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onFilesSelected }) =
   };
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (!snapConnected) {
+      setFlash(true);
+      setTimeout(() => setFlash(false), 400);
+      return;
+    }
     const selectedFiles = event.target.files ? Array.from(event.target.files) : [];
     setFiles(selectedFiles);
     onFilesSelected?.(selectedFiles);
@@ -48,9 +60,16 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onFilesSelected }) =
         style={{ display: "none" }}
         id="fileInput"
         onChange={handleFileChange}
+        disabled={!snapConnected}
       />
-      <label htmlFor="fileInput" style={{ cursor: "pointer", color: "#4a90e2" }}>
-        <div style={{ marginTop: "1rem" }}>Browse Files</div>
+      <label
+        htmlFor="fileInput"
+        style={{
+          cursor: snapConnected ? "pointer" : "not-allowed",
+          color: snapConnected ? "#4a90e2" : "#aaa",
+        }}
+      >
+      <div style={{ marginTop: "1rem" }}>Browse Files</div>
       </label>
       {files.length > 0 && (
         <ul style={{ marginTop: "1rem", padding: 0, listStyle: "none" }}>
